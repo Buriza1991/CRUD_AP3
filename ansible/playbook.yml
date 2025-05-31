@@ -1,0 +1,72 @@
+---
+- name: Deploy CRUD Application
+  hosts: app_servers
+  become: yes
+  vars:
+    app_directory: /opt/crud-app
+    node_version: "18.x"
+
+  tasks:
+    - name: Update apt cache
+      apt:
+        update_cache: yes
+      when: ansible_os_family == "Debian"
+
+    - name: Install required system packages
+      package:
+        name:
+          - git
+          - curl
+          - nodejs
+          - npm
+        state: present
+
+    - name: Create application directory
+      file:
+        path: "{{ app_directory }}"
+        state: directory
+        mode: '0755'
+
+    - name: Clone application repository
+      git:
+        repo: "{{ repository_url }}"
+        dest: "{{ app_directory }}"
+        version: main
+
+    - name: Install backend dependencies
+      npm:
+        path: "{{ app_directory }}/backend"
+        state: present
+
+    - name: Install frontend dependencies
+      npm:
+        path: "{{ app_directory }}/frontend"
+        state: present
+
+    - name: Build frontend
+      command:
+        chdir: "{{ app_directory }}/frontend"
+        cmd: npm run build
+
+    - name: Setup environment variables
+      template:
+        src: env.j2
+        dest: "{{ app_directory }}/backend/.env"
+
+    - name: Start backend service
+      systemd:
+        name: crud-backend
+        enabled: yes
+        state: started
+
+    - name: Configure Nginx
+      template:
+        src: nginx.conf.j2
+        dest: /etc/nginx/sites-available/crud-app
+      notify: restart nginx
+
+  handlers:
+    - name: restart nginx
+      service:
+        name: nginx
+        state: restarted 
