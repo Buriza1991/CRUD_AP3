@@ -8,10 +8,24 @@ import { sequelize } from './config/database';
 dotenv.config();
 
 const app = express();
-const PORT = Number(process.env.PORT) || 3001;
+const PORT = Number(process.env.PORT) || 3000;
+
+// CORS Configuration - Permitindo acesso do Vercel
+const corsOptions = {
+  origin: [
+    'http://localhost:3000',
+    'http://localhost:3001', 
+    'https://crud-ap-3.vercel.app',
+    'https://crud-ap-3-*.vercel.app', // Para qualquer variação do nome
+    /^https:\/\/.*\.vercel\.app$/ // Regex para qualquer subdomínio vercel
+  ],
+  credentials: true,
+  methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
+  allowedHeaders: ['Content-Type', 'Authorization']
+};
 
 // Middleware
-app.use(cors());
+app.use(cors(corsOptions));
 app.use(express.json());
 
 // Routes
@@ -20,7 +34,7 @@ app.use('/students', studentRoutes);
 
 // Health check endpoint
 app.get('/health', (req, res) => {
-  res.json({ status: 'ok' });
+  res.json({ status: 'ok', message: 'Backend is running!' });
 });
 
 // Database connection and server start
