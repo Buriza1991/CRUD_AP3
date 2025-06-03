@@ -1,0 +1,73 @@
+AWSTemplateFormatVersion: '2010-09-09'
+Description: 'CRUD Application Infrastructure'
+
+Parameters:
+  DBPassword:
+    NoEcho: true
+    Description: The database admin account password
+    Type: String
+    MinLength: 8
+
+Resources:
+  VPC:
+    Type: AWS::EC2::VPC
+    Properties:
+      CidrBlock: 10.0.0.0/16
+      EnableDnsHostnames: true
+      EnableDnsSupport: true
+      Tags:
+        - Key: Name
+          Value: crud-vpc
+
+  PublicSubnet:
+    Type: AWS::EC2::Subnet
+    Properties:
+      VpcId: !Ref VPC
+      CidrBlock: 10.0.1.0/24
+      AvailabilityZone: !Select [0, !GetAZs '']
+      MapPublicIpOnLaunch: true
+      Tags:
+        - Key: Name
+          Value: crud-public-subnet
+
+  RDSInstance:
+    Type: AWS::RDS::DBInstance
+    Properties:
+      DBName: cruddb
+      Engine: postgres
+      MasterUsername: dbadmin
+      MasterUserPassword: !Ref DBPassword
+      DBInstanceClass: db.t3.micro
+      AllocatedStorage: '20'
+      VPCSecurityGroups:
+        - !Ref RDSSecurityGroup
+
+  RDSSecurityGroup:
+    Type: AWS::EC2::SecurityGroup
+    Properties:
+      GroupDescription: Enable database access
+      VpcId: !Ref VPC
+      SecurityGroupIngress:
+        - IpProtocol: tcp
+          FromPort: 5432
+          ToPort: 5432
+          CidrIp: 10.0.0.0/16
+
+  AppInstance:
+    Type: AWS::EC2::Instance
+    Properties:
+      ImageId: ami-0c55b159cbfafe1f0
+      InstanceType: t2.micro
+      SubnetId: !Ref PublicSubnet
+      Tags:
+        - Key: Name
+          Value: crud-app-server
+
+Outputs:
+  RDSEndpoint:
+    Description: Endpoint for RDS instance
+    Value: !GetAtt RDSInstance.Endpoint.Address
+
+  AppPublicIP:
+    Description: Public IP of the application server
+    Value: !GetAtt AppInstance.PublicIp 
