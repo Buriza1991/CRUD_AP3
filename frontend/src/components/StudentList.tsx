@@ -131,7 +131,12 @@ export const StudentList: React.FC = () => {
           {students.map(student => (
             <div key={student.id} className="student-card">
               <div className="student-header">
-                <h3 className="student-name">{student.name}</h3>
+                <div className="student-name-section">
+                  <h3 className="student-name">{student.name}</h3>
+                  {student.customId && (
+                    <span className="student-custom-id">ID: {student.customId}</span>
+                  )}
+                </div>
                 {student.belt && (
                   <span className={`student-belt belt-${student.belt.toLowerCase()}`}>
                     {translateBelt(student.belt)}

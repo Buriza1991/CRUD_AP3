@@ -158,6 +158,30 @@ export const StudentForm: React.FC = () => {
     }));
   };
 
+  // Handler para campos de texto que devem aceitar apenas letras e acentos
+  const handleTextOnlyChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const { name, value } = e.target;
+    // Permitir apenas letras (maiúsculas e minúsculas), acentos, espaços e hífens
+    const textOnly = value.replace(/[^a-zA-ZÀ-ÿ\s\-']/g, '');
+    
+    setFormData(prev => ({
+      ...prev,
+      [name]: textOnly
+    }));
+  };
+
+  // Handler para campos de endereço que devem aceitar apenas letras e acentos
+  const handleAddressTextChange = (fieldName: keyof Address) => (e: React.ChangeEvent<HTMLInputElement>) => {
+    const value = e.target.value;
+    // Permitir apenas letras (maiúsculas e minúsculas), acentos, espaços e hífens
+    const textOnly = value.replace(/[^a-zA-ZÀ-ÿ\s\-']/g, '');
+    
+    setAddressFields(prev => ({
+      ...prev,
+      [fieldName]: textOnly
+    }));
+  };
+
   const handlePhoneChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const value = e.target.value;
     // Permitir apenas números
@@ -174,20 +198,20 @@ export const StudentForm: React.FC = () => {
 
   const handleNumberChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
-    // Para peso, permitir números com vírgula ou ponto
+    
     if (name === 'weight') {
-      const normalizedValue = value.replace(',', '.');
-      const numValue = normalizedValue === '' ? '' : normalizedValue;
+      // Para peso, permitir apenas números inteiros
+      const numbersOnly = value.replace(/[^\d]/g, '');
       setFormData(prev => ({
         ...prev,
-        [name]: numValue as any
+        [name]: numbersOnly as any
       }));
     } else if (name === 'age') {
       // Para idade, apenas números inteiros
-      const numValue = value === '' ? '' : value;
+      const numbersOnly = value.replace(/[^\d]/g, '');
       setFormData(prev => ({
         ...prev,
-        [name]: numValue as any
+        [name]: numbersOnly as any
       }));
     }
   };
@@ -248,8 +272,9 @@ export const StudentForm: React.FC = () => {
                 name="name"
                 className="form-input"
                 value={formData.name}
-                onChange={handleChange}
+                onChange={handleTextOnlyChange}
                 placeholder="Digite o nome completo"
+                title="Apenas letras, acentos e espaços são permitidos"
                 required
               />
             </div>
@@ -265,6 +290,7 @@ export const StudentForm: React.FC = () => {
                 value={formData.age}
                 onChange={handleNumberChange}
                 placeholder="Ex: 25"
+                title="Apenas números inteiros são permitidos"
                 pattern="[0-9]*"
                 required
               />
@@ -282,11 +308,13 @@ export const StudentForm: React.FC = () => {
                 className="form-input"
                 value={formData.weight}
                 onChange={handleNumberChange}
-                placeholder="Ex: 75,5 ou 75.5"
+                placeholder="Ex: 75"
+                title="Apenas números inteiros são permitidos"
+                pattern="[0-9]*"
                 required
               />
               <small style={{ color: '#999', fontSize: '0.85rem', marginTop: '0.3rem' }}>
-                Use vírgula ou ponto para decimais
+                Apenas números inteiros
               </small>
             </div>
 
@@ -402,8 +430,9 @@ export const StudentForm: React.FC = () => {
                     name="street"
                     className="form-input"
                     value={addressFields.street}
-                    onChange={(e) => setAddressFields(prev => ({ ...prev, street: e.target.value }))}
+                    onChange={handleAddressTextChange('street')}
                     placeholder="Rua/Avenida"
+                    title="Apenas letras, acentos e espaços são permitidos"
                     required
                   />
                 </div>
@@ -427,8 +456,9 @@ export const StudentForm: React.FC = () => {
                     name="complement"
                     className="form-input"
                     value={addressFields.complement || ''}
-                    onChange={(e) => setAddressFields(prev => ({ ...prev, complement: e.target.value }))}
+                    onChange={handleAddressTextChange('complement')}
                     placeholder="Complemento (opcional)"
+                    title="Apenas letras, acentos e espaços são permitidos"
                   />
                 </div>
                 <div className="form-group">
@@ -437,8 +467,9 @@ export const StudentForm: React.FC = () => {
                     name="neighborhood"
                     className="form-input"
                     value={addressFields.neighborhood}
-                    onChange={(e) => setAddressFields(prev => ({ ...prev, neighborhood: e.target.value }))}
+                    onChange={handleAddressTextChange('neighborhood')}
                     placeholder="Bairro"
+                    title="Apenas letras, acentos e espaços são permitidos"
                     required
                   />
                 </div>
@@ -451,8 +482,9 @@ export const StudentForm: React.FC = () => {
                     name="city"
                     className="form-input"
                     value={addressFields.city}
-                    onChange={(e) => setAddressFields(prev => ({ ...prev, city: e.target.value }))}
+                    onChange={handleAddressTextChange('city')}
                     placeholder="Cidade"
+                    title="Apenas letras, acentos e espaços são permitidos"
                     required
                   />
                 </div>

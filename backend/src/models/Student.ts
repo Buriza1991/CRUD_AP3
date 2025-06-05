@@ -4,6 +4,7 @@ import { MartialArt, VALID_MARTIAL_ARTS, VALID_BELTS } from '../types/student';
 
 interface StudentAttributes {
   id: number;
+  customId: string; // ID personalizado como JJ01, MT01, etc.
   name: string;
   age: number;
   belt?: string;
@@ -18,10 +19,11 @@ interface StudentAttributes {
   updatedAt: Date;
 }
 
-interface StudentCreationAttributes extends Optional<StudentAttributes, 'id' | 'createdAt' | 'updatedAt' | 'belt' | 'startDate' | 'active'> {}
+interface StudentCreationAttributes extends Optional<StudentAttributes, 'id' | 'customId' | 'createdAt' | 'updatedAt' | 'belt' | 'startDate' | 'active'> {}
 
 class Student extends Model<StudentAttributes, StudentCreationAttributes> implements StudentAttributes {
   public id!: number;
+  public customId!: string;
   public name!: string;
   public age!: number;
   public belt!: string;
@@ -42,6 +44,11 @@ Student.init(
       type: DataTypes.INTEGER,
       autoIncrement: true,
       primaryKey: true,
+    },
+    customId: {
+      type: DataTypes.STRING,
+      allowNull: false,
+      unique: true,
     },
     name: {
       type: DataTypes.STRING,

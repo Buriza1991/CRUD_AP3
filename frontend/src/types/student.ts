@@ -25,6 +25,7 @@ export interface StudentInput {
 
 export interface StudentResponse extends StudentInput {
   id: number;
+  customId: string;
   createdAt: Date;
   updatedAt: Date;
 }

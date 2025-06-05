@@ -87,10 +87,27 @@
   margin-bottom: 1rem;
 }
 
+.student-name-section {
+  display: flex;
+  flex-direction: column;
+  gap: 0.3rem;
+}
+
 .student-name {
   font-size: 1.5rem;
   color: #ffd700;
   margin: 0;
+}
+
+.student-custom-id {
+  font-size: 0.9rem;
+  color: #b0b0b0;
+  background: rgba(255, 215, 0, 0.1);
+  padding: 0.2rem 0.6rem;
+  border-radius: 12px;
+  border: 1px solid rgba(255, 215, 0, 0.3);
+  width: fit-content;
+  font-weight: 600;
 }
 
 .student-belt {

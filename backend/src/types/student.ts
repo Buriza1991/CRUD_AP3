@@ -12,6 +12,7 @@ export interface Address {
 
 export interface StudentAttributes {
   id: number;
+  customId: string;
   name: string;
   age: number;
   belt?: string;

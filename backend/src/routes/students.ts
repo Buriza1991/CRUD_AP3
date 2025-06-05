@@ -1,9 +1,49 @@
 import { Router } from 'express';
 import { Student } from '../models/Student';
 import { validateStudentInput } from '../middlewares/validateStudent';
-import { StudentInput, StudentResponse } from '../types/student';
+import { StudentInput, StudentResponse, MartialArt } from '../types/student';
+import { Op } from 'sequelize';
 
 const router = Router();
+
+// Função para gerar ID personalizado baseado na arte marcial
+const generateCustomId = async (martialArts: MartialArt[]): Promise<string> => {
+  // Usar a primeira arte marcial para definir o prefixo
+  const primaryArt = martialArts[0];
+  let prefix = '';
+  
+  switch (primaryArt) {
+    case 'jiujitsu':
+      prefix = 'JJ';
+      break;
+    case 'muaythai':
+      prefix = 'MT';
+      break;
+    default:
+      prefix = 'AL'; // Aluno genérico
+  }
+  
+  // Buscar o último número usado para esse prefixo
+  const lastStudent = await Student.findOne({
+    where: {
+      customId: {
+        [Op.like]: `${prefix}%`
+      }
+    },
+    order: [['customId', 'DESC']]
+  });
+  
+  let nextNumber = 1;
+  if (lastStudent && lastStudent.customId) {
+    const lastNumber = parseInt(lastStudent.customId.substring(2));
+    if (!isNaN(lastNumber)) {
+      nextNumber = lastNumber + 1;
+    }
+  }
+  
+  // Formatar com zero à esquerda (ex: 01, 02, 03...)
+  return `${prefix}${nextNumber.toString().padStart(2, '0')}`;
+};
 
 // Listar todos os estudantes
 router.get('/', async (req, res) => {
@@ -57,8 +97,13 @@ router.get('/:id', async (req, res) => {
 router.post('/', validateStudentInput, async (req, res) => {
   try {
     const studentData = req.body as StudentInput;
+    
+    // Gerar ID personalizado baseado na arte marcial
+    const customId = await generateCustomId(studentData.martialArts);
+    
     const student = await Student.create({
       ...studentData,
+      customId,
       startDate: studentData.startDate || new Date(),
       active: studentData.active !== undefined ? studentData.active : true
     });
